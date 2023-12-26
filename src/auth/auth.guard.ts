@@ -5,9 +5,11 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { UsersService } from 'src/users/users.service';
+import { IS_ADMIN_KEY } from './admin.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -15,6 +17,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private usersService: UsersService,
+    private reflector: Reflector,
   ) {}
 
   private extractTokenFromHeader(request: Request): string | undefined {
@@ -23,11 +26,15 @@ export class AuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isAdmin = this.reflector.getAllAndOverride<boolean>(IS_ADMIN_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    if (!token) {
-      throw new UnauthorizedException();
-    }
+    if (!token) throw new UnauthorizedException();
+
     try {
       const {
         user: { id, role },
@@ -40,14 +47,17 @@ export class AuthGuard implements CanActivate {
         role,
       });
 
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
+      // Attach the user to the request object
       request['user'] = user;
     } catch {
       throw new UnauthorizedException(
         'Invalid token, please request a new one.',
       );
     }
+
+    if (isAdmin && request.user.role !== 'admin')
+      throw new UnauthorizedException('Only admins can access.');
+
     return true;
   }
 }
