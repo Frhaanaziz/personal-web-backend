@@ -2,6 +2,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
@@ -11,6 +12,7 @@ import { ResendService } from 'nestjs-resend';
 import { UsersService } from 'src/users/users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginGoogleDto } from './dto/login-google.dto';
+import { SignInDto } from './dto/sign-in.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,37 +24,38 @@ export class AuthService {
     private prismaService: PrismaService,
   ) {}
 
-  // async getUserByUsername(username: string): Promise<User> {
-  //   return this.prismaService.user.findUnique({ where: { username } });
-  // }
+  async signIn(signInDto: SignInDto) {
+    const { email, password } = signInDto;
 
-  // async createUser(authCredentialsDto: AuthCredentialsDto): Promise<User> {
-  //   const { password, username } = authCredentialsDto;
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
-  //   const salt = await bcrypt.genSalt();
-  //   const hashedPassword = await bcrypt.hash(password, salt);
+    if (user && !user.hashedPassword)
+      throw new NotFoundException(
+        'Please create a password from forgot password',
+      );
 
-  //   try {
-  //     return await this.prismaService.user.create({
-  //       data: {
-  //         username,
-  //         password: hashedPassword,
-  //       },
-  //     });
-  //   } catch (error) {
-  //     if (error.code === 'P2002')
-  //       throw new ConflictException('Username already exists');
-  //     throw new InternalServerErrorException();
-  //   }
-  // }
-  async verifyEmailToken(token: string) {
-    try {
-      return this.jwtService.verify(token, {
-        secret: process.env.JWT_SECRET,
-      });
-    } catch (error) {
-      throw new UnauthorizedException('Invalid token');
-    }
+    if (!user || !user?.hashedPassword)
+      throw new UnauthorizedException('Incorrect email or password');
+
+    if (!user.emailVerified)
+      throw new UnauthorizedException('Please confirm your email to login');
+
+    const passwordMatch = await bcrypt.compare(password, user.hashedPassword);
+
+    if (!passwordMatch)
+      throw new UnauthorizedException('Incorrect email or password');
+
+    const accessTokenPayload = { user: { id: user.id, role: user.role } };
+    const accessToken = this.jwtService.sign(accessTokenPayload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    });
+
+    return { accessToken, user };
   }
 
   async signUp(authCredentialsDto: AuthCredentialsDto) {
@@ -162,20 +165,13 @@ export class AuthService {
     }
   }
 
-  // async signIn(authCredentialsDto: AuthCredentialsDto) {
-  //   const { username, password } = authCredentialsDto;
-
-  //   const user = await this.prismaService.user.findUnique({
-  //     where: { username },
-  //   });
-
-  //   if (user && (await bcrypt.compare(password, user.password))) {
-  //     const payload: JwtPayload = { username };
-  //     const accessToken = this.jwtService.sign(payload);
-
-  //     return { accessToken };
-  //   } else {
-  //     throw new UnauthorizedException('Please check your login credentials');
-  //   }
-  // }
+  async verifyEmailToken(token: string) {
+    try {
+      return this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET,
+      });
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
 }
