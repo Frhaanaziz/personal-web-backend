@@ -1,18 +1,17 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ResendService } from 'nestjs-resend';
 import { UsersService } from 'src/users/users.service';
-import jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
+  private logger = new Logger('AuthService');
   constructor(
     private usersService: UsersService,
     private resendService: ResendService,
-    private prismaService: PrismaService,
     private jwtService: JwtService,
   ) {}
 
@@ -52,6 +51,7 @@ export class AuthService {
         password,
         exist.hashedPassword,
       );
+
       if (!passwordMatch)
         throw new UnauthorizedException('Incorrect email or password');
 
@@ -69,35 +69,37 @@ export class AuthService {
       });
 
       const emailTokenPayload = { user: { id: user.id } };
-      const emailToken = jwt.sign(emailTokenPayload, process.env.EMAIL_SECRET, {
-        expiresIn: process.env.JWT_EXPIRED_IN,
+      const emailToken = this.jwtService.sign(emailTokenPayload, {
+        secret: process.env.EMAIL_SECRET,
+        expiresIn: process.env.JWT_EXPIRES_IN,
       });
 
       this.resendService.send({
         from: 'Portfolio <portfolio-console@aththariq.com>',
         to: [email],
         subject: 'Email Verification',
-        html: `<div><h1>Confirm Email</h1><a href={${
+        html: `<div><h1>Confirm Email</h1><a href="${
           process.env.FRONTEND_URL +
           '/api/auth/verify-email?token=' +
           emailToken
-        }}>Click here to verify your email address</a></div>`,
+        }">Click here to verify your email address</a></div>`,
       });
     } else if (!exist.emailVerified) {
       const emailTokenPayload = { user: { id: exist.id } };
-      const emailToken = jwt.sign(emailTokenPayload, process.env.EMAIL_SECRET, {
-        expiresIn: process.env.JWT_EXPIRED_IN,
+      const emailToken = this.jwtService.sign(emailTokenPayload, {
+        secret: process.env.EMAIL_SECRET,
+        expiresIn: process.env.JWT_EXPIRES_IN,
       });
 
       this.resendService.send({
         from: 'Portfolio <portfolio-console@aththariq.com>',
         to: [email],
         subject: 'Email Verification',
-        html: `<div><h1>Confirm Email</h1><a href={${
+        html: `<div><h1>Confirm Email</h1><a href="${
           process.env.FRONTEND_URL +
           '/api/auth/verify-email?token=' +
           emailToken
-        }}>Click here to verify your email address</a></div>`,
+        }">Click here to verify your email address</a></div>`,
       });
     }
   }
