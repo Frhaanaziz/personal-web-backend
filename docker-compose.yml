@@ -12,11 +12,11 @@ services:
       MYSQL_PASSWORD: testing
     restart: always
 
-  phpmyadmin:
-    image: phpmyadmin
-    container_name: phpmyadmin
-    ports:
-      - '8068:80'
-    depends_on:
-      - mysql-personal-web
-    restart: always
+  # phpmyadmin:
+  #   image: phpmyadmin
+  #   container_name: phpmyadmin
+  #   ports:
+  #     - '8068:80'
+  #   depends_on:
+  #     - mysql-personal-web
+  #   restart: always
