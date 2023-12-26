@@ -1,9 +1,16 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ResendService } from 'nestjs-resend';
 import { UsersService } from 'src/users/users.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { LoginGoogleDto } from './dto/login-google.dto';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +19,7 @@ export class AuthService {
     private usersService: UsersService,
     private resendService: ResendService,
     private jwtService: JwtService,
+    private prismaService: PrismaService,
   ) {}
 
   // async getUserByUsername(username: string): Promise<User> {
@@ -109,6 +117,46 @@ export class AuthService {
           emailToken
         }">Click here to verify your email address</a></div>`,
       });
+    }
+  }
+
+  async loginGoogle(loginGoogleDto: LoginGoogleDto) {
+    const { accounts, ...data } = loginGoogleDto;
+
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          email: data.email,
+        },
+      });
+
+      if (!user) {
+        const user = await this.prismaService.user.create({
+          data: {
+            ...data,
+            accounts: {
+              create: accounts,
+            },
+          },
+        });
+
+        const accessTokenPayload = { user: { id: user.id, role: user.role } };
+        const accessToken = this.jwtService.sign(accessTokenPayload, {
+          secret: process.env.JWT_SECRET,
+          expiresIn: process.env.JWT_EXPIRES_IN,
+        });
+
+        return { accessToken, user };
+      } else {
+        const accessTokenPayload = { user: { id: user.id, role: user.role } };
+        const accessToken = this.jwtService.sign(accessTokenPayload, {
+          secret: process.env.JWT_SECRET,
+          expiresIn: process.env.JWT_EXPIRES_IN,
+        });
+        return { accessToken, user };
+      }
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to login');
     }
   }
 
