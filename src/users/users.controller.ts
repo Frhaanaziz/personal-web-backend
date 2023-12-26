@@ -1,7 +1,15 @@
-import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserEmailVerifiedDto } from './dto/update-user-email-verified.dto';
 import { User } from '@prisma/client';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -20,6 +28,7 @@ export class UsersController {
     return this.usersService.resetPassword({ userId: id, newPassword });
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id/emailVerified')
   update(
     @Param('id') id: string,
