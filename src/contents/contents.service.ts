@@ -7,7 +7,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class ContentsService {
   constructor(private prismaService: PrismaService) {}
-
   async findOne(
     contentWhereUniqueInput: Prisma.ContentWhereUniqueInput,
   ): Promise<Content | null> {
@@ -15,7 +14,6 @@ export class ContentsService {
       where: contentWhereUniqueInput,
     });
   }
-
   async findMany(params: {
     skip?: number;
     take?: number;
@@ -32,13 +30,11 @@ export class ContentsService {
       orderBy,
     });
   }
-
   async create(data: CreateContentDto): Promise<Content> {
     return this.prismaService.content.create({
       data,
     });
   }
-
   async update(params: {
     where: Prisma.ContentWhereUniqueInput;
     data: UpdateContentDto;
@@ -49,7 +45,6 @@ export class ContentsService {
       where,
     });
   }
-
   async delete(where: Prisma.ContentWhereUniqueInput): Promise<Content> {
     return this.prismaService.content.delete({
       where,

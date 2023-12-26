@@ -9,7 +9,7 @@ import {
 import { UsersService } from './users.service';
 import { UpdateUserEmailVerifiedDto } from './dto/update-user-email-verified.dto';
 import { User } from '@prisma/client';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from 'src/auth/auth-guard/auth.guard';
 
 @Controller('users')
 export class UsersController {
