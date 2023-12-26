@@ -4,6 +4,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
 import { ResendService } from 'nestjs-resend';
 import { JwtService } from '@nestjs/jwt';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -59,6 +61,25 @@ export class UsersService {
     return this.db.user.delete({
       where,
     });
+  }
+
+  async resetPassword({ newPassword, userId }: ResetPasswordDto) {
+    try {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const updatedUser = await this.db.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          hashedPassword,
+          emailVerified: true,
+        },
+      });
+
+      return updatedUser;
+    } catch (error) {
+      throw new NotFoundException('Account not found');
+    }
   }
 
   async validateEmail(email: string) {
