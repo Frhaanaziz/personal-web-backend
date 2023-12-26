@@ -92,7 +92,7 @@ export class UsersService {
 
       const emailTokenPayload = { user: { id: user.id } };
       const emailToken = this.jwtService.sign(emailTokenPayload, {
-        secret: process.env.EMAIL_SECRET,
+        secret: process.env.JWT_SECRET,
         expiresIn: process.env.JWT_EXPIRES_IN,
       });
 
