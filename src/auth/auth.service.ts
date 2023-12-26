@@ -37,6 +37,15 @@ export class AuthService {
   //     throw new InternalServerErrorException();
   //   }
   // }
+  async verifyEmailToken(token: string) {
+    try {
+      return this.jwtService.verify(token, {
+        secret: process.env.EMAIL_SECRET,
+      });
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
 
   async signUp(authCredentialsDto: AuthCredentialsDto) {
     const { name, email, password } = authCredentialsDto;

@@ -11,6 +11,11 @@ export class AuthController {
     return this.authService.signUp(authCredentialsDto);
   }
 
+  @Post('/verify-email-token')
+  verifyEmailToken(@Body('token') token: string) {
+    return this.authService.verifyEmailToken(token);
+  }
+
   // @Post('/signin')
   // signIn(@Body() authCredentialsDto: AuthCredentialsDto) {
   //   return this.authService.signIn(authCredentialsDto);
