@@ -1,11 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
+import { ResendService } from 'nestjs-resend';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
-  constructor(private db: PrismaService) {}
+  constructor(
+    private db: PrismaService,
+    private resendService: ResendService,
+    private jwtService: JwtService,
+  ) {}
 
   async findOne(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
@@ -53,5 +59,39 @@ export class UsersService {
     return this.db.user.delete({
       where,
     });
+  }
+
+  async validateEmail(email: string) {
+    try {
+      const user = await this.db.user.findUnique({
+        where: {
+          email,
+        },
+      });
+
+      const emailTokenPayload = { user: { id: user.id } };
+      const emailToken = this.jwtService.sign(emailTokenPayload, {
+        secret: process.env.EMAIL_SECRET,
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      });
+
+      this.resendService.send({
+        from: 'Portfolio <portfolio-console@aththariq.com>',
+        to: [email],
+        subject: 'Email Verification',
+        html: `
+              <div>
+                  <h1>Confirm Email</h1>
+                   <a 
+                   href="${process.env.FRONTEND_URL}/auth/reset-password/${emailToken}"
+                     >Click here to reset your password</a>
+              </div>
+               `,
+      });
+
+      return user;
+    } catch (error) {
+      throw new NotFoundException('Account not found');
+    }
   }
 }
