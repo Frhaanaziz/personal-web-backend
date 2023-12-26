@@ -48,7 +48,7 @@ export class AuthService {
   async verifyEmailToken(token: string) {
     try {
       return this.jwtService.verify(token, {
-        secret: process.env.EMAIL_SECRET,
+        secret: process.env.JWT_SECRET,
       });
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
@@ -86,7 +86,7 @@ export class AuthService {
 
       const emailTokenPayload = { user: { id: user.id } };
       const emailToken = this.jwtService.sign(emailTokenPayload, {
-        secret: process.env.EMAIL_SECRET,
+        secret: process.env.JWT_SECRET,
         expiresIn: process.env.JWT_EXPIRES_IN,
       });
 
@@ -97,13 +97,15 @@ export class AuthService {
         html: `<div><h1>Confirm Email</h1><a href="${
           process.env.FRONTEND_URL +
           '/api/auth/verify-email?token=' +
-          emailToken
+          emailToken +
+          '&id=' +
+          user.id
         }">Click here to verify your email address</a></div>`,
       });
     } else if (!exist.emailVerified) {
       const emailTokenPayload = { user: { id: exist.id } };
       const emailToken = this.jwtService.sign(emailTokenPayload, {
-        secret: process.env.EMAIL_SECRET,
+        secret: process.env.JWT_SECRET,
         expiresIn: process.env.JWT_EXPIRES_IN,
       });
 
