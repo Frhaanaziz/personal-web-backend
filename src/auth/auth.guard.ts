@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -10,6 +11,7 @@ import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  private logger = new Logger(AuthGuard.name);
   constructor(
     private jwtService: JwtService,
     private usersService: UsersService,
@@ -29,11 +31,11 @@ export class AuthGuard implements CanActivate {
     try {
       const {
         user: { id, role },
-      } = await this.jwtService.verifyAsync(token, {
+      } = await this.jwtService.verify(token, {
         secret: process.env.JWT_SECRET,
       });
 
-      const user = this.usersService.findOne({
+      const user = await this.usersService.findOne({
         id,
         role,
       });
