@@ -37,15 +37,16 @@ export class AuthGuard implements CanActivate {
 
     try {
       const {
-        user: { id, role },
+        // user: { id, role },
+        user,
       } = await this.jwtService.verify(token, {
         secret: process.env.JWT_SECRET,
       });
 
-      const user = await this.usersService.findOne({
-        id,
-        role,
-      });
+      // const user = await this.usersService.findOne({
+      //   id,
+      //   role,
+      // });
 
       // Attach the user to the request object
       request['user'] = user;
@@ -55,8 +56,12 @@ export class AuthGuard implements CanActivate {
       );
     }
 
-    if (isAdmin && request.user.role !== 'admin')
-      throw new UnauthorizedException('Only admins can access.');
+    if (isAdmin) {
+      this.logger.warn('Only admins can access.');
+      if (request.user.role !== 'admin')
+        throw new UnauthorizedException('Only admins can access.');
+      this.logger.verbose('Admin access granted.');
+    }
 
     return true;
   }
