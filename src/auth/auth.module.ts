@@ -5,7 +5,6 @@ import { PassportModule } from '@nestjs/passport';
 import { ResendModule } from 'nestjs-resend';
 import { UsersService } from 'src/users/users.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { AuthGuardModule } from './auth-guard/auth-guard.module';
 
 @Module({
   imports: [
@@ -14,7 +13,6 @@ import { AuthGuardModule } from './auth-guard/auth-guard.module';
       apiKey: process.env.RESEND_API_KEY,
     }),
     PrismaModule,
-    AuthGuardModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, UsersService],
