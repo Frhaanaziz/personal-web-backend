@@ -32,7 +32,15 @@ export class ContentsService {
   }
   async create(data: CreateContentDto): Promise<Content> {
     return this.prismaService.content.create({
-      data,
+      data: {
+        content: data.content,
+        locale: data.locale,
+        keyword: {
+          connect: {
+            id: data.keywordId,
+          },
+        },
+      },
     });
   }
   async update(params: {
