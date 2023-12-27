@@ -1,35 +1,59 @@
 import {
   Controller,
   Get,
+  Param,
+  Query,
+  UseGuards,
+  BadRequestException,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
 } from '@nestjs/common';
 import { KeywordsService } from './keywords.service';
 import { CreateKeywordDto } from './dto/create-keyword.dto';
 import { UpdateKeywordDto } from './dto/update-keyword.dto';
 import { FindAllKeywordsDto } from './dto/find-all-keywords.dto';
+import { AuthGuard } from 'src/auth/auth-guard/auth.guard';
+import { Admin } from 'src/auth/admin.decorator';
 
+@UseGuards(AuthGuard)
 @Controller('keywords')
 export class KeywordsController {
   constructor(private readonly keywordsService: KeywordsService) {}
 
-  // @Post()
-  // create(@Body() createKeywordDto: CreateKeywordDto) {
-  //   return this.keywordsService.create(createKeywordDto);
-  // }
-
-  @Get()
-  findAll(@Query() { page }: FindAllKeywordsDto) {
-    return this.keywordsService.findAll({ page: Number(page) });
+  @Admin()
+  @Post()
+  create(@Body() createKeywordDto: CreateKeywordDto) {
+    return this.keywordsService.create(createKeywordDto);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.keywordsService.findOne(+id);
+  @Get()
+  findAll(@Query() findAllKeywordsDto: FindAllKeywordsDto) {
+    const { page, group, locale } = findAllKeywordsDto;
+    if (page) return this.keywordsService.findAll({ page: Number(page) });
+
+    if (group && locale)
+      return this.keywordsService.findMany({
+        where: { group },
+        include: {
+          Content: {
+            where: {
+              locale,
+            },
+          },
+        },
+      });
+
+    throw new BadRequestException('Missing query params');
+  }
+
+  @Get(':id')
+  findById(@Param('id') id: string) {
+    return this.keywordsService.findOne({ id });
+  }
+
+  // @Get('section')
+  // findBySection(@Query() { section }: FindAllKeywordsDto) {
+  //   return this.keywordsService.findBySection({ section });
   // }
 
   // @Patch(':id')
