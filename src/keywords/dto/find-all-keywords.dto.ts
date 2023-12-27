@@ -1,7 +1,15 @@
-import { IsNotEmpty, IsNumberString } from 'class-validator';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
 
 export class FindAllKeywordsDto {
   @IsNumberString()
-  @IsNotEmpty()
-  page: number;
+  @IsOptional()
+  page: number | null;
+
+  @IsString()
+  @IsOptional()
+  group: string | null;
+
+  @IsString()
+  @IsOptional()
+  locale: string | null;
 }
