@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateKeywordDto } from './dto/create-keyword.dto';
 import { UpdateKeywordDto } from './dto/update-keyword.dto';
 import { Keyword, Prisma } from '@prisma/client';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { UtilityService } from 'src/utility/utility.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { UtilityService } from '../utility/utility.service';
 
 @Injectable()
 export class KeywordsService {

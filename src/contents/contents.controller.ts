@@ -8,9 +8,9 @@ import {
 } from '@nestjs/common';
 import { ContentsService } from './contents.service';
 import { UpdateContentDto } from './dto/update-content.dto';
-import { AuthGuard } from 'src/auth/auth-guard/auth.guard';
-import { Admin } from 'src/auth/admin.decorator';
 import { CreateContentDto } from './dto/create-content.dto';
+import { AuthGuard } from '../auth/auth-guard/auth.guard';
+import { Admin } from '../auth/admin.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('contents')

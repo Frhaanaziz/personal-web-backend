@@ -3,8 +3,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { ResendModule } from 'nestjs-resend';
-import { UsersService } from 'src/users/users.service';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { UsersService } from '../users/users.service';
 
 @Module({
   imports: [

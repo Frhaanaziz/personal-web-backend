@@ -14,8 +14,8 @@ import { KeywordsService } from './keywords.service';
 import { CreateKeywordDto } from './dto/create-keyword.dto';
 import { UpdateKeywordDto } from './dto/update-keyword.dto';
 import { FindAllKeywordsDto } from './dto/find-all-keywords.dto';
-import { AuthGuard } from 'src/auth/auth-guard/auth.guard';
-import { Admin } from 'src/auth/admin.decorator';
+import { AuthGuard } from '../auth/auth-guard/auth.guard';
+import { Admin } from '../auth/admin.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('keywords')
