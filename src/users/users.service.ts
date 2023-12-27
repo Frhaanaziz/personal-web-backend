@@ -104,7 +104,7 @@ export class UsersService {
               <div>
                   <h1>Confirm Email</h1>
                    <a 
-                   href="${process.env.FRONTEND_URL}/auth/reset-password/${emailToken}"
+                   href="${process.env.CONSOLE_URL}/auth/reset-password/${emailToken}"
                      >Click here to reset your password</a>
               </div>
                `,

@@ -98,7 +98,7 @@ export class AuthService {
         to: [email],
         subject: 'Email Verification',
         html: `<div><h1>Confirm Email</h1><a href="${
-          process.env.FRONTEND_URL +
+          process.env.CONSOLE_URL +
           '/api/auth/verify-email?token=' +
           emailToken +
           '&id=' +
@@ -117,9 +117,7 @@ export class AuthService {
         to: [email],
         subject: 'Email Verification',
         html: `<div><h1>Confirm Email</h1><a href="${
-          process.env.FRONTEND_URL +
-          '/api/auth/verify-email?token=' +
-          emailToken
+          process.env.CONSOLE_URL + '/api/auth/verify-email?token=' + emailToken
         }">Click here to verify your email address</a></div>`,
       });
     }
