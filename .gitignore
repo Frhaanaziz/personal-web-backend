@@ -1,5 +1,5 @@
 # compiled output
-# /dist # manually uncomment this line
+/dist
 /node_modules
 
 # Logs
