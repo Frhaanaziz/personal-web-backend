@@ -1,15 +1,11 @@
 import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { ResendModule } from 'nestjs-resend';
 import { JwtService } from '@nestjs/jwt';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [
-    ResendModule.forRoot({
-      apiKey: process.env.RESEND_API_KEY,
-    }),
-  ],
+  imports: [AuthModule],
   controllers: [UsersController],
   providers: [UsersService, JwtService],
 })

@@ -6,12 +6,6 @@ import { AuthGuardModule } from '../auth/auth-guard/auth-guard.module';
 @Module({
   imports: [AuthGuardModule],
   controllers: [ContentsController],
-  providers: [
-    ContentsService,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthGuard,
-    // },
-  ],
+  providers: [ContentsService],
 })
 export class ContentsModule {}
