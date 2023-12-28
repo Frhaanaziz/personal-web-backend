@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AuthGuard } from './auth.guard';
 import { JwtStrategy } from '../jwt.strategy';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { ResendModule } from 'nestjs-resend';
 import { UsersService } from '../../users/users.service';
 import { AuthModule } from '../auth.module';
 
