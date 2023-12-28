@@ -34,6 +34,7 @@ export class KeywordsService {
     where?: Prisma.KeywordWhereInput;
     orderBy?: Prisma.KeywordOrderByWithRelationInput;
     include?: Prisma.KeywordInclude;
+    select?: Prisma.KeywordSelect;
   }): Promise<Keyword[]> {
     const { skip, take, cursor, where, orderBy, include } = params;
     return this.prismaService.keyword.findMany({
@@ -66,7 +67,24 @@ export class KeywordsService {
     });
   }
 
-  findAll({ page }: { page: number }) {
+  async findAll({ page }: { page: number }) {
     return this.utilityService.getPaginatedResult(page, 'Keyword');
+  }
+
+  async findIntlMessage({ locale }: { locale: string }) {
+    return this.prismaService.keyword.findMany({
+      select: {
+        keyword: true,
+        group: true,
+        Content: {
+          where: {
+            locale,
+          },
+          select: {
+            content: true,
+          },
+        },
+      },
+    });
   }
 }

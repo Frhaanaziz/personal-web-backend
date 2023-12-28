@@ -41,6 +41,9 @@ export class KeywordsController {
         },
       });
 
+    if (!group && locale)
+      return this.keywordsService.findIntlMessage({ locale });
+
     throw new BadRequestException('Missing query params');
   }
 
