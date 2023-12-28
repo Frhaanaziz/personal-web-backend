@@ -16,12 +16,14 @@ import { UpdateKeywordDto } from './dto/update-keyword.dto';
 import { FindAllKeywordsDto } from './dto/find-all-keywords.dto';
 import { AuthGuard } from '../auth/auth-guard/auth.guard';
 import { Admin } from '../auth/admin.decorator';
+import { Public } from '../auth/public.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('keywords')
 export class KeywordsController {
   constructor(private readonly keywordsService: KeywordsService) {}
 
+  @Public()
   @Get()
   findAll(@Query() findAllKeywordsDto: FindAllKeywordsDto) {
     const { page, group, locale } = findAllKeywordsDto;

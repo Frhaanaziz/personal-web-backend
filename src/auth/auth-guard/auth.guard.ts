@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { IS_ADMIN_KEY } from '../admin.decorator';
 import { UsersService } from '../../users/users.service';
+import { iS_PUBLIC_KEY } from '../public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -30,6 +31,12 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
+
+    const isPublic = this.reflector.getAllAndOverride<boolean>(iS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) return true;
 
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
