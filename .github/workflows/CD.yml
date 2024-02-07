@@ -1,5 +1,4 @@
-name: Check build time and deploy to azure VM
-
+name: Continuous Deployment
 on:
   push:
     branches: ['main']
@@ -11,34 +10,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Check the code on Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run build
-        run: npm run build
-
   deploy:
-    needs: build
-
-    name: Deploy to Azure VM
+    name: Deploy to Alibaba Cloud
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Deploy to Azure VM
+      - name: SSH and deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -46,8 +25,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd /home/farhan/app/personal-web-backend || true
+            source ~/.nvm/nvm.sh || true
+            nvm use 20 || true
+            cd /home/farhan/apps/personal-web-backend || true
+            git stash || true
             git pull origin main || true
-            npm install || true
-            npm run build || true
-            pm2 reload ecosystem.config.js || true
+            pnpm install || true
+            pnpm run build || true
+            NODE_ENV=production pm2 reload dev --update-env || true
