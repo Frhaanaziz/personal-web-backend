@@ -1,8 +1,8 @@
 module.exports = {
   apps: [
     {
-      name: 'dev.aththariq.com',
-      script: 'npm',
+      name: 'dev',
+      script: 'pnpm',
       args: 'run start:prod',
       watch: false,
       instances: 1,
